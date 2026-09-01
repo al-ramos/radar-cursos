@@ -20,7 +20,7 @@ O PSG do Senac exige renda familiar de até 2 salários mínimos por pessoa.
 |---|---|
 | Curso | nome e objetivo |
 | Região | Capital, Grande SP, Litoral ou Interior |
-| Tipo | Livre, Técnico, Médio Técnico, Aprendiz ou Qualificação |
+| Tipo / Categoria | nível (Livre, Técnico, Médio Técnico, Aprendiz, Qualificação) e o assunto do curso |
 | Duração | carga horária, quando publicada |
 | Local | cidade, bairro, endereço e telefone da unidade |
 | Início / Término | datas da turma (Senac: "a definir" até a bolsa abrir) |
@@ -28,19 +28,19 @@ O PSG do Senac exige renda familiar de até 2 salários mínimos por pessoa.
 | Vagas | vagas em aberto, ou o selo "bolsa" |
 | Inscrição | link oficial — **Reservar** ou **Ver bolsas** |
 
-Filtros por escola, região, cidade, unidade, tipo e mês de início, busca livre e ordenação por
+Filtros por escola, categoria, região, cidade, unidade, tipo e mês de início, busca livre e ordenação por
 qualquer coluna. A página é um arquivo único, sem dependências, e funciona offline.
 
 ## Dados
 
-`dados.json` — 192 cursos e 559 linhas curso-unidade, coletados em 01/09/2026 de
+`dados.json` — 192 cursos em 12 categorias e 559 linhas curso-unidade, coletados em 01/09/2026 de
 [sp.senai.br](https://www.sp.senai.br/cursos/0/tecnologia-da-informacao-e-informatica) e
 [sp.senac.br](https://www.sp.senac.br/bolsas-de-estudo/cursos-com-bolsa).
 
 ```json
 {
   "inst": "SENAI-SP",              // escola
-  "n": "nome", "t": "tipo",
+  "n": "nome", "t": "tipo", "cat": "categoria temática",
   "ch": 40,                        // carga horária (null quando não publicada)
   "d": "descrição",
   "u": [["Região","Cidade","Bairro","Endereço","Telefone",
