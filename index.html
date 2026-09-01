@@ -130,7 +130,7 @@ const BASE="https://www.sp.senai.br/";
 const uniq=a=>[...new Set(a)].sort((x,y)=>x.localeCompare(y,"pt"));
 const fill=(sel,vals)=>vals.forEach(v=>{const o=document.createElement("option");o.value=o.textContent=v;sel.append(o)});
 const MES=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
-const mesDe=s=>s?MES[+s.slice(3,5)-1]+"/"+s.slice(8):"";
+const mesDe=s=>s?MES[+s.slice(3,5)-1]+"/"+s.slice(6):"";
 const dnum=s=>s?+(s.slice(6)+s.slice(3,5)+s.slice(0,2)):0;
 fill(fi,uniq(rows.map(r=>r.inst)));
 const porVolume=k=>{const c={};rows.forEach(r=>{if(r[k])c[r[k]]=(c[r[k]]||0)+1});
@@ -144,7 +144,7 @@ let sortK="n",sortD=1;
 function syncSelects(){
   const reg=fr.value,cid=fc.value;
   const esc=fi.value;
-  const cidades=uniq(rows.filter(r=>r.cid&&(!esc||r.inst===esc)&&(!kat||r.cat===kat)&&(!reg||r.r===reg)).map(r=>r.cid));
+  const cidades=uniq(rows.filter(r=>r.cid&&(!esc||r.inst===esc)&&(!reg||r.r===reg)).map(r=>r.cid));
   const cur=fc.value;fc.innerHTML='<option value="">Todas as cidades</option>';fill(fc,cidades);
   if(cidades.includes(cur))fc.value=cur;
   const unis=uniq(rows.filter(r=>r.bai&&(!esc||r.inst===esc)&&(!reg||r.r===reg)&&(!fc.value||r.cid===fc.value)).map(r=>r.cid+" – "+r.bai));
@@ -153,7 +153,7 @@ function syncSelects(){
 }
 function render(){
   const q=qi.value.trim().toLowerCase(),esc=fi.value,kat=fk.value,reg=fr.value,cid=fc.value,uni=fu.value,tp=ft.value,mes=fm.value,open=only.checked;
-  const out=rows.filter(r=>(!open||r.ini||r.cid)&&(!esc||r.inst===esc)&&(!reg||r.r===reg)&&(!cid||r.cid===cid)&&(!tp||r.t===tp)
+  const out=rows.filter(r=>(!open||r.ini||r.cid)&&(!esc||r.inst===esc)&&(!kat||r.cat===kat)&&(!reg||r.r===reg)&&(!cid||r.cid===cid)&&(!tp||r.t===tp)
     &&(!uni||(r.cid+" – "+r.bai)===uni)&&(!mes||mesDe(r.ini)===mes)
     &&(!q||(r.inst+" "+r.cat+" "+r.n+" "+r.cid+" "+r.bai+" "+r.end+" "+r.d).toLowerCase().includes(q)));
   out.sort((a,b)=>{
