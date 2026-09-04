@@ -10,7 +10,7 @@ instituições em uma única tabela filtrável — unidade, endereço, datas, va
 | Aba | O que é | Escolas |
 |---|---|---|
 | **Cursos livres** | Cursos livres e de qualificação, do curso de 20 horas à formação técnica curta. É onde ficam as turmas com data e vaga publicadas | SENAI-SP, Senac-SP, AvançaTech, Fundação Bradesco, IFSP, Novotec Expresso |
-| **Formação longa** | Técnico das Etecs e superior de tecnologia das Fatecs. A formação é gratuita, mas a entrada é por processo seletivo com prova e **taxa de inscrição** | Etec, Fatec |
+| **Formação longa** | Técnico e superior das Etecs, Fatecs e do IFSP. A formação é gratuita; a entrada é por processo seletivo, com **taxa de inscrição** no Centro Paula Souza | Etec, Fatec, IFSP |
 | **Programas com seleção** | Programas de ONGs e institutos, com processo seletivo e recorte de público — idade, escolaridade, renda ou gênero. Costumam incluir mentoria e encaminhamento a vagas | Instituto PROA, Escola da Nuvem, Generation Brasil, {reprograma} |
 
 ## Escolas cobertas
@@ -23,10 +23,10 @@ Cada escola entrega a vaga de um jeito. O campo `mod` define o selo da coluna **
 | **Senac-SP** | Cursos com bolsa do PSG, presenciais (área Tecnologia da Informação) | `bolsa` | A bolsa abre 20 dias antes do início, ao meio-dia, por ordem de chegada; **Ver bolsas** abre a página do curso |
 | **AvançaTech** | Java, PHP, .NET, React e Games com IA, 120 h, em 7 polos da capital | `continuo` | Matrícula em fluxo contínuo; a turma começa quando o grupo fecha |
 | **Fundação Bradesco** | Cisco, Web Design e Desenvolvimento, na unidade de Osasco | `oferta` | Turmas por semestre em manhã, tarde ou noite; **Ver turmas** abre o site da fundação |
-| **IFSP** | Cursos FIC, de extensão e do PRONATEC nos câmpus da capital e Grande SP | `edital` | Vagas abertas por edital do câmpus, com prazo próprio a cada oferta |
+| **IFSP** | Nos livres: cursos FIC, de extensão e do PRONATEC. Na formação longa: técnico e superior de TI em 25 câmpus | `edital` / `vestibular` | FIC sai por edital do câmpus; técnico e superior, pelo processo seletivo do IFSP |
 | **Novotec Expresso** | Qualificação em TIC de 120 h, em Etecs, Fatecs e parceiras | `edital` | Edital periódico do Governo de SP; os municípios mudam a cada rodada |
-| **Etec** | Técnico do eixo de Informação e Comunicação | `vestibular` | Vestibulinho semestral, com prova e taxa de inscrição |
-| **Fatec** | Superior de tecnologia do eixo de Informação e Comunicação | `vestibular` | Vestibular semestral, com taxa de inscrição |
+| **Etec** | Técnico do eixo de Informação e Comunicação, por unidade | `vestibular` | Vestibulinho semestral, com prova e taxa de inscrição |
+| **Fatec** | Superior de tecnologia do eixo de Informação e Comunicação, por unidade | `vestibular` | Vestibular semestral, com taxa de inscrição |
 | **Instituto PROA** | ProProfissão · Desenvolvimento de Software, 6 meses, semipresencial | `selecao` | Processo seletivo por turma |
 | **Escola da Nuvem** | Tech para Todos · Nuvem AWS e IA, presencial na Fundação Julita | `selecao` | Processo seletivo por turma |
 | **Generation Brasil** | Bootcamp de Análise de Dados, em São Paulo e Campinas | `selecao` | Processo seletivo por turma |
@@ -57,11 +57,15 @@ qualquer coluna. Cada aba refaz os próprios filtros e esconde os que não têm 
 
 ## Dados
 
-`dados.json` — 225 cursos de 12 instituições, em 12 categorias e 51 subcategorias.
+`dados.json` — 260 cursos de 12 instituições, em 12 categorias e 51 subcategorias.
 
-- **SENAI-SP e Senac-SP**: coleta de 01/09/2026, com turma, data e vaga por unidade.
-- **Demais escolas**: coleta de 03/09/2026, no nível de oferta — curso, unidade ou polo e link oficial, **sem** data de
-  turma, porque essas instituições não publicam calendário fixo.
+Três níveis de detalhe, conforme o que a instituição publica:
+
+- **SENAI-SP e Senac-SP** — coleta de 01/09/2026. Turma, data e vaga por unidade.
+- **Etec, Fatec e IFSP** — coletados por script (`coletor-cps.js`, `coletor-ifsp.js`). Unidade, endereço, telefone,
+  período e vagas, mas **sem data**: o calendário é do processo seletivo, não da turma.
+- **Demais escolas** — coleta manual de 03/09/2026, no nível de oferta: curso, unidade ou polo e link oficial. Sem data
+  nem vaga, porque essas instituições não publicam nenhum dos dois.
 
 ```json
 {
@@ -83,14 +87,30 @@ Um link que começa com `http` é absoluto; os demais são caminhos em `https://
 caminho relativo. Turma sem data (`""`) e com `vagas: null` é oferta ainda sem calendário; o selo na coluna **Vagas**
 diz por quê (bolsa, fluxo contínuo, por edital, seleção, vestibular).
 
+## Coletores
+
+```bash
+node coletor-cps.js     # Etec e Fatec, do vestibulinho e do vestibular
+node coletor-ifsp.js    # técnico e superior de TI do catálogo do IFSP
+node build.js           # reembute dados.json no index.html
+```
+
+Cada coletor reescreve só as próprias entradas do `dados.json` e deixa o resto intacto, então dá para rodar um sem o
+outro. Ambos aceitam `--dry`, que coleta e mostra o resumo sem tocar no arquivo. As páginas baixadas ficam em `.cache/`;
+apague o diretório para forçar coleta nova.
+
+Duas notas de campo, para quem for mexer:
+
+- Os portais do Centro Paula Souza ficam atrás de um WAF que devolve **403 para o cliente HTTP do Node** — ele recusa
+  pela impressão digital do TLS, então mandar `User-Agent` de navegador no `fetch()` não resolve. Os coletores chamam o
+  `curl`, que passa e vem junto com o Windows 10+ e o macOS.
+- O catálogo do IFSP é um array JavaScript embutido na página, não uma API. O coletor converte esse literal para JSON
+  num passe que respeita o conteúdo das strings, em vez de executar o código que veio do site.
+
 ## Build
 
 `index.html` embute uma cópia de `dados.json` para funcionar offline. `dados.json` é a fonte da verdade — depois de
-editá-lo, rode:
-
-```bash
-node build.js
-```
+editá-lo à mão ou de rodar um coletor, rode `node build.js`.
 
 > Vagas e turmas mudam com frequência. Confirme no site da instituição antes de concluir a inscrição.
 
